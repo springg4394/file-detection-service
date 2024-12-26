@@ -1,0 +1,33 @@
+services:
+  ai-detection:
+    build:
+      context: ./detection-consumer
+    stdin_open: true
+    tty: true
+    networks:
+      - common-network
+    volumes:
+      - ./detection-consumer:/app
+    environment:
+      - MINIO_SERVER_ACCESS_KEY=minio
+      - MINIO_SERVER_SECRET_KEY=miniosecret
+      - MINIO_SERVER_URL=minio:9000
+      - ES_HOST=http://elasticsearch:9200
+      - ES_INDEX_NAME=image-model1
+      - KAFKA_HOST=kafka:9092
+      - KAFKA_TOPIC=image-model
+      - KAFKA_GROUP=search-class
+    restart: always
+    entrypoint: ["bash", "/app/detection-starts.sh"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities:
+              - gpu
+              device_ids:
+              - "0"
+
+networks:
+  common-network:
+    external: true
